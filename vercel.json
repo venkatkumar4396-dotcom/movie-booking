@@ -2,15 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "movie booking/run.py",
-      "use": "@vercel/python",
-      "config": { "maxDuration": 60 }
+      "src": "movie_booking/run.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "movie booking/run.py"
+      "dest": "movie_booking/run.py"
     }
   ]
 }
