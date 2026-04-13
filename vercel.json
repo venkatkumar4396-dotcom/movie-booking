@@ -3,7 +3,8 @@
   "builds": [
     {
       "src": "movie booking/run.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": { "maxDuration": 60 }
     }
   ],
   "routes": [
