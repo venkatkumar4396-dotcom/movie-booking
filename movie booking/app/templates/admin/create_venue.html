@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Create Venue - MovieBook{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="mb-4">Create New Venue</h1>
+            
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Venue Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" class="form-control" id="city" name="city" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="capacity" class="form-label">Capacity (seats)</label>
+                                <input type="number" class="form-control" id="capacity" name="capacity" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="amenities" class="form-label">Amenities (comma-separated)</label>
+                            <input type="text" class="form-control" id="amenities" name="amenities" placeholder="e.g., WiFi, Parking, Cafe, Air Conditioning">
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Create Venue</button>
+                            <a href="{{ url_for('admin.manage_venues') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

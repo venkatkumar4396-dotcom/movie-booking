@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Home - MovieBook{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <p class="eyebrow">Fresh shows, clean booking</p>
+                <h1>Pick your next seat before the lights go down.</h1>
+                <p class="hero-copy">Movies, concerts, sports, and workshops are gathered into one fast booking flow with clear showtimes and simple seat selection.</p>
+                <form class="hero-search mt-4" method="GET" action="{{ url_for('main.events') }}">
+                    <div class="input-group input-group-lg">
+                        <input id="heroSearch" type="search" name="search" class="form-control" placeholder="Search movies, concerts, sports..." aria-label="Search">
+                        <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                </form>
+                <div class="hero-actions">
+                    <a href="{{ url_for('main.events') }}" class="btn btn-primary btn-lg">
+                        Browse Events <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                    <a href="{{ url_for('main.premium') }}" class="btn btn-outline-primary btn-lg">
+                        Go Premium
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="ticket-stack" aria-label="Featured booking snapshot">
+                    <div class="ticket-card ticket-card-main">
+                        <div>
+                            <span class="ticket-label">Tonight</span>
+                            <h2>Prime Screen</h2>
+                            <p>8:45 PM at City Center</p>
+                        </div>
+                        <div class="ticket-price">Rs. 240</div>
+                    </div>
+                    <div class="ticket-card ticket-card-side">
+                        <span><i class="fas fa-chair"></i> Seats open</span>
+                        <strong>126</strong>
+                    </div>
+                    <div class="ticket-strip">
+                        <span>Movie</span>
+                        <span>Concert</span>
+                        <span>Sports</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured carousel -->
+<section class="featured-carousel-section mt-4">
+    <div class="container">
+        <div id="featuredCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                {% for event in events.items[:6] %}
+                    <div class="carousel-item {% if loop.first %}active{% endif %}">
+                        <div class="d-flex align-items-center featured-slide p-4">
+                            <div class="featured-poster-frame me-4">
+                                <img src="{{ event.poster_url or url_for('static', filename='img/featured-1.jpg') }}" alt="{{ event.title }}" class="poster-img rounded">
+                            </div>
+                            <div>
+                                <h3 class="mb-1">{{ event.title }}</h3>
+                                <p class="mb-1 text-muted">{{ event.genre }} • {{ event.event_type.value.capitalize() }}</p>
+                                <p class="mb-1">{{ event.description[:160] }}{% if event.description|length > 160 %}...{% endif %}</p>
+                                <a class="btn btn-sm btn-primary" href="{{ url_for('main.event_detail', event_id=event.id) }}">View</a>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="carousel-item active"><div class="p-4">No featured events</div></div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#featuredCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#featuredCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+</section>
+
+<section class="section-band">
+    <div class="container">
+        <div class="section-heading">
+            <p class="eyebrow">Trending now</p>
+            <h2>Shows people are booking this week</h2>
+        </div>
+
+        <div class="row g-4">
+            {% for event in events.items[:8] %}
+                <div class="col-md-6 col-lg-4 col-xl-3">
+                    <article class="event-card event-type-{{ event.event_type.value }} h-100">
+                        <img src="{{ event.poster_url or url_for('static', filename='img/trending-1.jpg') }}" alt="{{ event.title }}" class="card-img-top poster-img">
+                        <div class="event-card-body">
+                            <h3 class="event-title">{{ event.title }}</h3>
+                            <p class="event-genre">{{ event.genre[:42] }}</p>
+                            <div class="event-footer">
+                                <span>{{ event.shows.count() }} shows</span>
+                                <a href="{{ url_for('main.event_detail', event_id=event.id) }}" class="btn btn-sm btn-primary">Book</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="{{ url_for('main.events') }}" class="btn btn-outline-primary btn-lg">View All Events</a>
+        </div>
+    </div>
+</section>
+
+<section class="upcoming-section py-4">
+    <div class="container">
+        <div class="section-heading">
+            <p class="eyebrow">Coming up</p>
+            <h2>Upcoming shows</h2>
+        </div>
+
+        <div class="row g-3">
+            {% for show in upcoming_shows %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="show-card">
+                        <div class="show-card-content">
+                            <div class="show-time-section me-3">
+                                <div class="show-time">{{ show.show_date.strftime('%I:%M %p') }}</div>
+                                <div class="show-format">{{ show.show_date.strftime('%b %d') }}</div>
+                            </div>
+                            <div>
+                                <h4 class="venue-name">{{ show.event.title }}</h4>
+                                <p class="venue-city">{{ show.venue.name }} · {{ show.venue.city }}</p>
+                                <div class="price-seats mt-2"><span class="price">Rs. {{ '%.0f' % show.base_price }}</span></div>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('main.select_seats', show_id=show.id) }}" class="btn btn-book-now btn-sm">Book</a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12"><p class="text-muted">No upcoming shows</p></div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="value-section">
+    <div class="container">
+        <div class="section-heading">
+            <p class="eyebrow">Why MovieBook</p>
+            <h2>Everything important stays obvious</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="benefit-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Fast Flow</h3>
+                    <p>Reach checkout in a few clear steps.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="benefit-card">
+                    <i class="fas fa-chair"></i>
+                    <h3>Seat Clarity</h3>
+                    <p>See what is open before you commit.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="benefit-card">
+                    <i class="fas fa-receipt"></i>
+                    <h3>Clean Summary</h3>
+                    <p>Prices, venues, and tickets stay visible.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="benefit-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Secure Demo</h3>
+                    <p>Built for simple, dependable checkout.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-panel">
+            <div>
+                <p class="eyebrow">Ready when you are</p>
+                <h2>Find a show that fits tonight.</h2>
+            </div>
+            <a href="{{ url_for('main.events') }}" class="btn btn-light btn-lg">Explore Now</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

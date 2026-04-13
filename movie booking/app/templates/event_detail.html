@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }} - MovieBook{% endblock %}
+
+{% block content %}
+<section class="event-hero-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-md-4">
+                <div class="event-visual-card event-poster-large">
+                    {% if event.poster_url %}
+                        <img class="event-poster-image poster-img" src="{{ event.poster_url }}" alt="{{ event.title }} poster">
+                    {% else %}
+                        <div class="event-type-large">{{ event.event_type.value.capitalize()[:1] }}</div>
+                        <div class="event-visual-title">{{ event.title }}</div>
+                    {% endif %}
+                    <div class="event-info-box">
+                        <div class="rating-box">
+                            <div class="rating-number">{{ event.average_rating }}</div>
+                            <div class="rating-label">Rating</div>
+                        </div>
+                        <div class="reviews-box">
+                            <div class="reviews-number">{{ event.total_reviews }}</div>
+                            <div class="reviews-label">Reviews</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <p class="eyebrow">{{ event.event_type.value.capitalize() }}</p>
+                <h1>{{ event.title }}</h1>
+                <div class="badge-group">
+                    <span class="badge soft-badge"><i class="fas fa-star me-1"></i>{{ event.average_rating }} rating</span>
+                    <span class="badge soft-badge">{{ event.total_reviews }} reviews</span>
+                    {% if event.rating %}
+                        <span class="badge soft-badge">{{ event.rating }}</span>
+                    {% endif %}
+                </div>
+                <p class="lead">{{ event.description }}</p>
+
+                <div class="event-meta-info">
+                    <div class="meta-item">
+                        <span class="meta-label">Genre</span>
+                        <span class="meta-value">{{ event.genre }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Duration</span>
+                        <span class="meta-value">{{ event.duration_minutes }} min</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Language</span>
+                        <span class="meta-value">{{ event.language }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Release</span>
+                        <span class="meta-value">{{ event.release_date.strftime('%b %d, %Y') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container my-5">
+    <section class="shows-section">
+        <div class="section-heading">
+            <p class="eyebrow">Available shows</p>
+            <h2>Select a time that works.</h2>
+        </div>
+
+        {% if shows_by_date %}
+            <div class="shows-dates-grid">
+                {% for date, shows_list in shows_by_date.items() %}
+                    <div class="date-column">
+                        <div class="date-header">
+                            <h3>{{ date.strftime('%a, %b %d') }}</h3>
+                            <span>{{ date.strftime('%A') }}</span>
+                        </div>
+                        <div class="shows-list">
+                            {% for show in shows_list %}
+                                <article class="show-card">
+                                    <div class="show-card-content">
+                                        <div class="show-time-section">
+                                            <div class="show-time">{{ show.start_time.strftime('%I:%M %p') }}</div>
+                                            <div class="show-format">Standard</div>
+                                        </div>
+                                        <div class="show-details">
+                                            <p class="venue-name">{{ show.venue.name }}</p>
+                                            <p class="venue-city"><i class="fas fa-map-marker-alt"></i> {{ show.venue.city }}</p>
+                                            <div class="price-seats">
+                                                <span class="price">Rs. {{ show.base_price }}</span>
+                                                <span><i class="fas fa-chair me-1"></i>{{ show.available_seats }} seats</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="show-action">
+                                        {% if current_user.is_authenticated %}
+                                            <a href="{{ url_for('main.select_seats', show_id=show.id) }}" class="btn btn-book-now">Book Now</a>
+                                        {% else %}
+                                            <a href="{{ url_for('auth.login', next=url_for('main.select_seats', show_id=show.id)) }}" class="btn btn-book-now">Login to Book</a>
+                                        {% endif %}
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <h2>No shows available</h2>
+                <p>Please check back soon.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="reviews-section mt-5">
+        <div class="section-heading section-heading-left">
+            <p class="eyebrow">Audience notes</p>
+            <h2>Reviews and ratings</h2>
+        </div>
+
+        <div class="reviews-container">
+            {% if reviews %}
+                <div class="row g-4">
+                    {% for review in reviews %}
+                        <div class="col-md-6">
+                            <article class="review-card">
+                                <div class="review-header">
+                                    <div class="reviewer-info">
+                                        <div class="reviewer-avatar">{{ review.reviewer.username[0].upper() }}</div>
+                                        <div>
+                                            <h3>{{ review.reviewer.username }}</h3>
+                                            <small class="text-muted">{{ review.created_at.strftime('%b %d, %Y') }}</small>
+                                        </div>
+                                    </div>
+                                    <span class="rating-badge"><i class="fas fa-star"></i> {{ review.rating }}/5</span>
+                                </div>
+                                <p class="review-text">{{ review.review_text }}</p>
+                            </article>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-comment-slash"></i>
+                    <h2>No reviews yet</h2>
+                    <p>Be the first to review this event.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

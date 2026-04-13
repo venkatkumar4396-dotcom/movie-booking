@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Bookings - MovieBook{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <p class="eyebrow">Your tickets</p>
+        <h1>My bookings.</h1>
+        <p>Track upcoming shows, payment status, and booking details.</p>
+    </div>
+</section>
+
+<div class="container my-5">
+    {% if bookings.items %}
+        <div class="row g-4">
+            {% for booking in bookings.items %}
+                <div class="col-md-6 col-xl-4">
+                    <article class="booking-card-pro h-100">
+                        <div class="booking-card-top">
+                            <span class="booking-code">{{ booking.booking_code }}</span>
+                            <span class="badge {% if booking.status.name == 'CONFIRMED' %}bg-success{% elif booking.status.name == 'PENDING' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ booking.status.name }}
+                            </span>
+                        </div>
+
+                        <div class="booking-card-body">
+                            <h2>{{ booking.show.event.title }}</h2>
+                            <div class="booking-detail-list">
+                                <p><strong>Date:</strong> {{ booking.show.show_date.strftime('%a, %b %d') }} at {{ booking.show.start_time.strftime('%I:%M %p') }}</p>
+                                <p><strong>Venue:</strong> {{ booking.show.venue.name }}, {{ booking.show.venue.city }}</p>
+                                <p><strong>Tickets:</strong> {{ booking.number_of_tickets }}</p>
+                                <p><strong>Total:</strong> Rs. {{ booking.total_price }}</p>
+                            </div>
+
+                            {% if booking.payment %}
+                                <p class="payment-status">
+                                    Payment:
+                                    <span class="badge {% if booking.payment.status.name == 'COMPLETED' %}bg-success{% elif booking.payment.status.name == 'PENDING' %}bg-warning{% else %}bg-danger{% endif %}">
+                                        {{ booking.payment.status.name }}
+                                    </span>
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="booking-card-actions">
+                            <a href="{{ url_for('booking.booking_details', booking_id=booking.id) }}" class="btn btn-primary btn-sm">View Details</a>
+                            {% if booking.status.name == 'CONFIRMED' %}
+                                <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal{{ booking.id }}">Cancel</button>
+                            {% endif %}
+                        </div>
+                    </article>
+                </div>
+
+                <div class="modal fade" id="cancelModal{{ booking.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2 class="modal-title h5">Cancel Booking</h2>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="POST" action="{{ url_for('booking.cancel_booking', booking_id=booking.id) }}">
+                                <div class="modal-body">
+                                    <p>Are you sure you want to cancel this booking?</p>
+                                    <p><strong>{{ booking.show.event.title }}</strong></p>
+                                    <p class="text-muted small">{{ booking.show.show_date.strftime('%B %d, %Y') }}</p>
+                                    <div class="mb-3">
+                                        <label for="reason{{ booking.id }}" class="form-label">Reason for cancellation</label>
+                                        <textarea class="form-control" id="reason{{ booking.id }}" name="reason" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Go Back</button>
+                                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if bookings.pages > 1 %}
+            <nav aria-label="Page navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if bookings.has_prev %}
+                        <li class="page-item"><a href="{{ url_for('booking.my_bookings', page=bookings.prev_num) }}" class="page-link">Previous</a></li>
+                    {% endif %}
+                    {% for page_num in bookings.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num == bookings.page %}
+                                <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                            {% else %}
+                                <li class="page-item"><a href="{{ url_for('booking.my_bookings', page=page_num) }}" class="page-link">{{ page_num }}</a></li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if bookings.has_next %}
+                        <li class="page-item"><a href="{{ url_for('booking.my_bookings', page=bookings.next_num) }}" class="page-link">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-ticket"></i>
+            <h2>No bookings yet</h2>
+            <p>Pick an event and your tickets will appear here.</p>
+            <a href="{{ url_for('main.events') }}" class="btn btn-primary">Browse Events</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

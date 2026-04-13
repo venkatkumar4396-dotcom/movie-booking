@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Details - MovieBook{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <p class="eyebrow">Booking {{ booking.booking_code }}</p>
+        <h1>Your booking details.</h1>
+        <p>Review your event, seats, payment status, and cancellation options.</p>
+    </div>
+</section>
+
+<div class="container my-5">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Event Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-md-3">
+                            <div class="event-card-header rounded">
+                                <span class="event-badge">{{ booking.show.event.event_type.value.upper()[:3] }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <h3 class="fw-bold">{{ booking.show.event.title }}</h3>
+                            <p class="text-muted">{{ booking.show.event.genre }}</p>
+                            <p><strong>Date & Time:</strong> {{ booking.show.show_date.strftime('%A, %B %d, %Y') }} at {{ booking.show.start_time.strftime('%I:%M %p') }}</p>
+                            <p class="mb-0"><strong>Venue:</strong> {{ booking.show.venue.name }}, {{ booking.show.venue.address }}, {{ booking.show.venue.city }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Booking Information</h2>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Booking Code</dt>
+                        <dd class="col-sm-8"><strong>{{ booking.booking_code }}</strong></dd>
+
+                        <dt class="col-sm-4">Booking Date</dt>
+                        <dd class="col-sm-8">{{ booking.booking_date.strftime('%B %d, %Y at %I:%M %p') }}</dd>
+
+                        <dt class="col-sm-4">Number of Tickets</dt>
+                        <dd class="col-sm-8">{{ booking.number_of_tickets }}</dd>
+
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge {% if booking.status.name == 'CONFIRMED' %}bg-success{% elif booking.status.name == 'PENDING' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ booking.status.name }}
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Booked Seats</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Seat Number</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booked_seat in booking.booked_seats %}
+                                    <tr>
+                                        <td><strong>{{ booked_seat.seat.row }}{{ booked_seat.seat.seat_number }}</strong></td>
+                                        <td>{{ booked_seat.category.value.capitalize() }}</td>
+                                        <td>Rs. {{ booked_seat.price }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="booking-summary-card">
+                <div class="summary-header">
+                    <h2 class="h6 mb-0">Payment Details</h2>
+                    <span class="summary-badge">Summary</span>
+                </div>
+                <div class="summary-body">
+                    {% if booking.payment %}
+                        <dl class="summary-details">
+                            <dt>Amount</dt>
+                            <dd>Rs. {{ booking.payment.amount }}</dd>
+
+                            <dt>Status</dt>
+                            <dd>
+                                <span class="badge {% if booking.payment.status.name == 'COMPLETED' %}bg-success{% elif booking.payment.status.name == 'PENDING' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ booking.payment.status.name }}
+                                </span>
+                            </dd>
+
+                            {% if booking.payment.payment_mode %}
+                                <dt>Payment Mode</dt>
+                                <dd>{{ booking.payment.payment_mode.replace('_', ' ').title() }}</dd>
+                            {% endif %}
+
+                            {% if booking.payment.transaction_id %}
+                                <dt>Transaction ID</dt>
+                                <dd><small>{{ booking.payment.transaction_id }}</small></dd>
+                            {% endif %}
+
+                            {% if booking.payment.payment_date %}
+                                <dt>Payment Date</dt>
+                                <dd><small>{{ booking.payment.payment_date.strftime('%b %d, %Y') }}</small></dd>
+                            {% endif %}
+
+                            {% if booking.payment.refund_amount > 0 %}
+                                <dt>Refund Amount</dt>
+                                <dd>Rs. {{ booking.payment.refund_amount }}</dd>
+
+                                <dt>Refund Date</dt>
+                                <dd><small>{{ booking.payment.refund_date.strftime('%b %d, %Y') }}</small></dd>
+                            {% endif %}
+                        </dl>
+                    {% else %}
+                        <p class="text-muted">No payment information available.</p>
+                    {% endif %}
+
+                    <div class="price-row my-4">
+                        <span>Total Amount</span>
+                        <strong>Rs. {{ booking.total_price }}</strong>
+                    </div>
+
+                    {% if booking.status.name == 'PENDING' and booking.payment and booking.payment.status.name == 'PENDING' %}
+                        <a href="{{ url_for('booking.payment', booking_id=booking.id) }}" class="btn btn-primary w-100">Complete Payment</a>
+                    {% elif booking.status.name == 'CONFIRMED' %}
+                        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#cancelModal">Cancel Booking</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5">Cancel Booking</h2>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('booking.cancel_booking', booking_id=booking.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-body">
+                    <p>Are you sure you want to cancel this booking? You will receive a refund of Rs. {{ booking.total_price }}.</p>
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason for cancellation</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Go Back</button>
+                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

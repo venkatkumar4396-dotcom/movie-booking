@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Create Show - MovieBook{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="mb-4">Create New Show</h1>
+            
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" id="createShowForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="mb-3">
+                            <label for="event_id" class="form-label">Event</label>
+                            <select class="form-select" id="event_id" name="event_id" required>
+                                <option value="">-- Select Event --</option>
+                                {% for event in events %}
+                                    <option value="{{ event.id }}">{{ event.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="venue_id" class="form-label">Venue</label>
+                            <select class="form-select" id="venue_id" name="venue_id" required onchange="loadScreens()">
+                                <option value="">-- Select Venue --</option>
+                                {% for venue in venues %}
+                                    <option value="{{ venue.id }}">{{ venue.name }} - {{ venue.city }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="screen_id" class="form-label">Screen</label>
+                            <select class="form-select" id="screen_id" name="screen_id" required>
+                                <option value="">-- Select Screen --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="show_date" class="form-label">Show Date</label>
+                                <input type="date" class="form-control" id="show_date" name="show_date" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="base_price" class="form-label">Base Price (₹)</label>
+                                <input type="number" class="form-control" id="base_price" name="base_price" step="0.01" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="start_time" class="form-label">Start Time</label>
+                                <input type="datetime-local" class="form-control" id="start_time" name="start_time" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="end_time" class="form-label">End Time</label>
+                                <input type="datetime-local" class="form-control" id="end_time" name="end_time" required>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Create Show</button>
+                            <a href="{{ url_for('admin.manage_shows') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function loadScreens() {
+    const venueId = document.getElementById('venue_id').value;
+    const screenSelect = document.getElementById('screen_id');
+    
+    if (!venueId) {
+        screenSelect.innerHTML = '<option value="">-- Select Screen --</option>';
+        return;
+    }
+    
+    // In a real application, this would be an AJAX request
+    // For now, we'll keep it simple
+    screenSelect.innerHTML = '<option value="">Loading screens...</option>';
+    
+    fetch(`{{ url_for('admin.create_show') }}?venue_id=${venueId}`)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const options = doc.querySelector('#screen_id').innerHTML;
+            screenSelect.innerHTML = options;
+        });
+}
+</script>
+{% endblock %}

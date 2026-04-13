@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Login - MovieBook{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+    <div class="container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <p class="eyebrow">Welcome back</p>
+                <h1>Log in to continue booking.</h1>
+            </div>
+
+            <form method="POST" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="mb-4">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control form-control-lg" id="username" name="username" autocomplete="username" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control form-control-lg" id="password" name="password" autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100">Login</button>
+            </form>
+
+            <p class="auth-footer-text">No account yet? <a href="{{ url_for('auth.register') }}">Register here</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}

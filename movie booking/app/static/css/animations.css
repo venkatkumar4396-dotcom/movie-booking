@@ -1,0 +1,415 @@
+/* ==================== PRO ANIMATIONS & TRANSITIONS ==================== */
+
+/* Page Fade-in Animations */
+@keyframes pageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Main container animations */
+.container {
+    animation: pageSlideIn 0.6s ease-out;
+}
+
+.card {
+    animation: scaleIn 0.4s ease-out;
+}
+
+/* Button Animations */
+.btn {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: left 0.3s ease;
+    z-index: -1;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    animation: slideInUp 0.5s ease-out;
+    box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(229, 9, 20, 0.5);
+}
+
+.btn-primary:active {
+    transform: translateY(-1px);
+}
+
+/* Loading States */
+.btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn.loading::after {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-left: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: rotate 0.8s linear infinite;
+    vertical-align: middle;
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 400px;
+}
+
+.toast {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--accent-color);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    animation: slideInRight 0.4s ease-out;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.toast.success {
+    border-left-color: var(--success-color);
+    background: linear-gradient(135deg, rgba(0, 176, 80, 0.1) 0%, rgba(0, 176, 80, 0.05) 100%);
+}
+
+.toast.error {
+    border-left-color: var(--danger-color);
+    background: linear-gradient(135deg, rgba(232, 17, 35, 0.1) 0%, rgba(232, 17, 35, 0.05) 100%);
+}
+
+.toast.warning {
+    border-left-color: var(--warning-color);
+    background: linear-gradient(135deg, rgba(255, 185, 0, 0.1) 0%, rgba(255, 185, 0, 0.05) 100%);
+}
+
+.toast.info {
+    border-left-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(229, 9, 20, 0.05) 100%);
+}
+
+.toast i {
+    font-size: 1.2rem;
+    min-width: 24px;
+    text-align: center;
+}
+
+.toast.success i {
+    color: var(--success-color);
+}
+
+.toast.error i {
+    color: var(--danger-color);
+}
+
+.toast.warning i {
+    color: var(--warning-color);
+}
+
+.toast.info i {
+    color: var(--primary-color);
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(400px);
+    }
+}
+
+.toast.hide {
+    animation: slideOut 0.4s ease-in forwards;
+}
+
+/* Card Entrance Animations */
+.show-card {
+    animation: scaleIn 0.5s ease-out;
+}
+
+.show-info-card {
+    animation: slideInDown 0.5s ease-out 0.1s backwards;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.booking-summary-card {
+    animation: slideInRight 0.5s ease-out 0.2s backwards;
+}
+
+/* Seat Grid Animation */
+.seat-row {
+    animation: slideInUp 0.4s ease-out;
+}
+
+.seat-row:nth-child(odd) {
+    animation-delay: 0.05s;
+}
+
+.seat-row:nth-child(even) {
+    animation-delay: 0.1s;
+}
+
+.seat-label {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Booking Summary Updates */
+.seat-items {
+    animation: slideInUp 0.3s ease-out;
+}
+
+.seat-item {
+    animation: slideInLeft 0.3s ease-out;
+}
+
+/* Loading Pulse */
+.pulse-animation {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Progress Indicator Animation */
+.progress-step {
+    transition: all 0.4s ease;
+}
+
+.progress-step.active {
+    animation: bounce 0.6s ease-out;
+}
+
+/* Dropdown Animations */
+.dropdown-menu.show {
+    animation: slideInDown 0.3s ease-out;
+}
+
+/* Modal Animations */
+.modal.show {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    animation: scaleIn 0.3s ease-out;
+}
+
+/* Admin Dashboard Animations */
+.chart-container {
+    animation: slideInUp 0.6s ease-out;
+}
+
+.stat-card {
+    animation: scaleIn 0.4s ease-out;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Form Input Animations */
+input:focus,
+textarea:focus,
+select:focus {
+    animation: pulse 0.5s ease-out;
+}
+
+/* Hover Effects */
+.show-card:hover {
+    animation: pulse 1s ease-in-out;
+}
+
+/* Recommendation Card */
+.recommendation-card {
+    animation: slideInUp 0.5s ease-out;
+    transition: all 0.3s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(229, 9, 20, 0.2);
+}
+
+/* Upcoming Shows Carousel */
+.carousel-item {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.carousel-controls {
+    animation: slideInDown 0.5s ease-out;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .toast-container {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideOut {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    }
+
+    .booking-summary-card {
+        animation: slideInUp 0.5s ease-out;
+    }
+
+    .container {
+        animation: slideInUp 0.5s ease-out;
+    }
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - MovieBook{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-5">
+    <h1 class="mb-4">Reports & Analytics</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Bookings by Status</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for status, count in bookings_by_status %}
+                                <tr>
+                                    <td>{{ status.name }}</td>
+                                    <td><strong>{{ count }}</strong></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Revenue by Payment Mode</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Payment Mode</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mode, revenue in revenue_by_mode %}
+                                <tr>
+                                    <td>{{ mode.replace('_', ' ').title() }}</td>
+                                    <td><strong>₹{{ "%.2f"|format(revenue) }}</strong></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Top Venues by Bookings</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Venue</th>
+                                <th>Total Bookings</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set total = top_venues|sum(attribute=1) %}
+                            {% for venue_name, booking_count in top_venues %}
+                                <tr>
+                                    <td>{{ venue_name }}</td>
+                                    <td><strong>{{ booking_count }}</strong></td>
+                                    <td>
+                                        <progress value="{{ booking_count }}" max="{{ top_venues[0][1] if top_venues else 1 }}" style="width: 100%"></progress>
+                                        {% if total > 0 %}
+                                            {{ "%.1f"|format((booking_count / total * 100)) }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Premium Lounge - MovieBook{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block content %}
+<section class="premium-hero">
+    <div class="container text-white">
+        <p class="eyebrow">Premium Lounge</p>
+        <h1>Exclusive events for premium members</h1>
+        <p class="lead">Handpicked shows, elevated experience, priority booking.</p>
+
+        <div class="mt-4">
+            {% if current_user.is_authenticated %}
+                <a class="btn btn-lg btn-primary me-2" href="#" id="becomeMemberBtn">Become a Member</a>
+                <a class="btn btn-lg btn-outline-light" href="{{ url_for('booking.my_bookings') }}">My Bookings</a>
+            {% else %}
+                <a class="btn btn-lg btn-primary me-2" href="{{ url_for('auth.login') }}">Login to Access</a>
+                <a class="btn btn-lg btn-outline-light" href="{{ url_for('auth.register') }}">Register</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<div class="container my-5">
+    {% if current_user.is_authenticated %}
+        {% if events.items %}
+            <div class="row g-4">
+                {% for event in events.items %}
+                    <div class="col-md-6 col-xl-4">
+                        <article class="premium-event-card h-100">
+                            <div class="premium-badge">Premium</div>
+                            <div class="premium-visual">
+                                <img class="premium-poster poster-img" src="{{ event.poster_url or url_for('static', filename='img/featured-1.jpg') }}" alt="{{ event.title }} poster">
+                            </div>
+                            <div class="premium-body">
+                                <h3 class="event-title">{{ event.title }}</h3>
+                                <p class="event-genre text-muted">{{ event.genre }}</p>
+                                <p class="event-description">{{ event.description[:140] }}{% if event.description|length > 140 %}...{% endif %}</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div>
+                                        <strong class="text-muted">{{ '★' }} {{ '%.1f' % (event.average_rating or 0) }}</strong>
+                                        <span class="text-muted ms-2">({{ event.total_reviews }} reviews)</span>
+                                    </div>
+                                    <a href="{{ url_for('main.event_detail', event_id=event.id) }}" class="btn btn-outline-primary btn-sm">View</a>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if events.has_prev or events.has_next %}
+                <nav aria-label="Page navigation" class="mt-5">
+                    <ul class="pagination pagination-modern justify-content-center">
+                        {% if events.has_prev %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('main.premium', page=events.prev_num) }}">Previous</a></li>
+                        {% endif %}
+                        {% for page_num in events.iter_pages() %}
+                            {% if page_num %}
+                                {% if page_num == events.page %}
+                                    <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                                {% else %}
+                                    <li class="page-item"><a class="page-link" href="{{ url_for('main.premium', page=page_num) }}">{{ page_num }}</a></li>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if events.has_next %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('main.premium', page=events.next_num) }}">Next</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-gem"></i>
+                <h2>No premium events found</h2>
+                <p>Check back soon for exclusive shows.</p>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state text-center">
+            <i class="fas fa-lock"></i>
+            <h2>Premium content</h2>
+            <p>Login or register to access exclusive premium events and priority booking.</p>
+            <a class="btn btn-primary me-2" href="{{ url_for('auth.login') }}">Login</a>
+            <a class="btn btn-outline-primary" href="{{ url_for('auth.register') }}">Register</a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Premium modal -->
+<div class="modal fade" id="premiumModal" tabindex="-1" aria-labelledby="premiumModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="premiumModalLabel">Premium Membership</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Unlock priority booking, exclusive events, premium seating, and more.</p>
+                <ul>
+                    <li>Priority booking for top events</li>
+                    <li>Access to premium-only shows</li>
+                    <li>Complimentary perks and early access</li>
+                </ul>
+                <div class="d-flex gap-2 mt-3">
+                    <button id="subscribeBtn" class="btn btn-primary">Subscribe — Rs. 499 / year</button>
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

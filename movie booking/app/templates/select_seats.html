@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+
+{% block title %}Select Seats - MovieBook{% endblock %}
+
+{% block content %}
+<!-- Booking Header -->
+<div class="booking-header">
+    <div class="container">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="mb-2">Select Your Seats</h1>
+                <p class="text-muted">Step 2 of 3 - Choose your preferred seats</p>
+            </div>
+            <div class="header-right">
+                <div class="progress-indicator">
+                    <div class="progress-step completed">
+                        <span>1</span>
+                        <p>Event</p>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step active">
+                        <span>2</span>
+                        <p>Seats</p>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step">
+                        <span>3</span>
+                        <p>Payment</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <!-- Seat Selection Layout -->
+            <div class="seat-selection-container">
+                <!-- Show Info Card -->
+                <div class="show-info-card">
+                    <div class="show-info-grid">
+                        <div class="info-item">
+                            <i class="fas fa-film"></i>
+                            <span>{{ show.event.title }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>{{ show.show_date.strftime('%b %d, %a') }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ show.start_time.strftime('%I:%M %p') }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ show.venue.name }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Screen -->
+                <div class="screen-section">
+                    <div class="screen-label">
+                        <div class="screen-rectangle"></div>
+                        <p>SCREEN</p>
+                    </div>
+                </div>
+                
+                <!-- Seat Layout -->
+                <div class="seat-layout">
+                    <div class="booking-info">
+                        <i class="fas fa-info-circle"></i>
+                        <p><strong>{{ booked_seat_ids|length }}</strong> seats booked | <strong id="selectedCount">0</strong> selected</p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('booking.create_booking') }}" id="bookingForm" onsubmit="return validateBooking();">
+                        <input type="hidden" name="show_id" value="{{ show.id }}">
+                        <input type="hidden" name="seats_data" id="seatsDataInput" value="">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        {% for row_letter, seats_in_row in seats_by_row.items() %}
+                            <div class="seat-row">
+                                <span class="row-label">{{ row_letter }}</span>
+                                <div class="row-seats">
+                                    {% for seat in seats_in_row %}
+                                        <input type="checkbox" id="seat_{{ seat.id }}" name="seat_ids" value="{{ seat.id }}" class="seat-checkbox d-none" data-seat-id="{{ seat.id }}" {% if not seat.is_available %}disabled data-booked="true"{% endif %}>
+                                        <label for="seat_{{ seat.id }}" class="seat-label {% if not seat.is_available %}booked{% elif seat.category.name == 'PREMIUM' %}premium{% elif seat.category.name == 'VIP' %}vip{% elif seat.category.name == 'BALCONY' %}balcony{% else %}regular{% endif %}" {% if not seat.is_available %}data-disabled="true" aria-disabled="true" tabindex="-1"{% else %}tabindex="0" role="button" aria-pressed="false"{% endif %} title="{% if not seat.is_available %}Booked{% else %}{{ seat.category.name }} - Rs. {{ show.base_price }}{% endif %}">
+                                            {{ seat.seat_number }}
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                                <span class="row-label">{{ row_letter }}</span>
+                            </div>
+                        {% endfor %}
+                    </form>
+                </div>
+                
+                <!-- Legend -->
+                <div class="seat-legend">
+                    <h6 class="mb-3">Legend</h6>
+                    <div class="legend-grid">
+                        <div class="legend-item">
+                            <span class="seat-legend-item regular"></span>
+                            <div class="legend-text">
+                                <p class="mb-0">Regular</p>
+                                <small>Base Price</small>
+                            </div>
+                        </div>
+                        <div class="legend-item">
+                            <span class="seat-legend-item vip"></span>
+                            <div class="legend-text">
+                                <p class="mb-0">VIP</p>
+                                <small>1.5x Price</small>
+                            </div>
+                        </div>
+                        <div class="legend-item">
+                            <span class="seat-legend-item premium"></span>
+                            <div class="legend-text">
+                                <p class="mb-0">Premium</p>
+                                <small>2x Price</small>
+                            </div>
+                        </div>
+                        <div class="legend-item">
+                            <span class="seat-legend-item balcony"></span>
+                            <div class="legend-text">
+                                <p class="mb-0">Balcony</p>
+                                <small>0.75x Price</small>
+                            </div>
+                        </div>
+                        <div class="legend-item">
+                            <span class="seat-legend-item booked"></span>
+                            <div class="legend-text">
+                                <p class="mb-0">Booked</p>
+                                <small>Unavailable</small>
+                            </div>
+                        </div>
+                        <div class="legend-item">
+                            <span class="seat-legend-item selected"></span>
+                            <div class="legend-text">
+                                <p class="mb-0">Your Selection</p>
+                                <small>Selected by You</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Booking Summary -->
+            <div class="booking-summary-card">
+                <div class="summary-header">
+                    <h6 class="mb-0">Booking Summary</h6>
+                    <span class="summary-badge">Step 2</span>
+                </div>
+                
+                <div class="summary-body">
+                    <!-- Show Details -->
+                    <div class="summary-section">
+                        <p class="summary-label">Show Details</p>
+                        <dl class="summary-details">
+                            <dt>Title</dt>
+                            <dd>{{ show.event.title }}</dd>
+                            <dt>Date & Time</dt>
+                            <dd>{{ show.show_date.strftime('%B %d, %Y') }}<br><small>{{ show.start_time.strftime('%I:%M %p') }}</small></dd>
+                            <dt>Venue</dt>
+                            <dd>{{ show.venue.name }}<br><small>{{ show.venue.city }}</small></dd>
+                        </dl>
+                    </div>
+
+                    <!-- Selected Seats -->
+                    <div class="summary-section">
+                        <p class="summary-label">Selected Seats</p>
+                        <div id="selectedSeatsContainer" class="selected-seats-list">
+                            <p class="text-muted small">No seats selected</p>
+                        </div>
+                    </div>
+
+                    <!-- Price Breakdown -->
+                    <div class="summary-section">
+                        <p class="summary-label">Price Breakdown</p>
+                        <div class="price-breakdown">
+                            <div class="price-row">
+                                <span>Total Seats:</span>
+                                <span id="totalSeats">0</span>
+                            </div>
+                            <div class="price-row">
+                                <span>Total Price:</span>
+                                <strong id="totalPrice">Rs. 0</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <button type="button" class="btn btn-primary w-100 mt-3" id="proceedBtn" disabled>
+                        <i class="fas fa-arrow-right me-2"></i>Proceed to Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+const basePrice = {{ show.base_price }};
+const formElement = document.getElementById('bookingForm');
+const proceedBtn = document.getElementById('proceedBtn');
+const selectedSeatsContainer = document.getElementById('selectedSeatsContainer');
+const totalPriceElement = document.getElementById('totalPrice');
+const totalSeatsElement = document.getElementById('totalSeats');
+const selectedCountElement = document.getElementById('selectedCount');
+const seatsDataInput = document.getElementById('seatsDataInput');
+
+const categoryMultipliers = {
+    'REGULAR': 1.0,
+    'VIP': 1.5,
+    'PREMIUM': 2.0,
+    'BALCONY': 0.75
+};
+
+function getSeatCategory(seatLabel) {
+    if (seatLabel.classList.contains('vip')) return 'VIP';
+    if (seatLabel.classList.contains('premium')) return 'PREMIUM';
+    if (seatLabel.classList.contains('balcony')) return 'BALCONY';
+    return 'REGULAR';
+}
+
+function getSeatRowAndNumber(seatLabel) {
+    // Extract row and number from the label - e.g., "A5" from seat_A5
+    const seatId = seatLabel.getAttribute('for');
+    const parts = seatId.match(/seat_(\w+)/);
+    return parts ? parts[1] : '';
+}
+
+function updateSummary() {
+    const checkedSeats = formElement.querySelectorAll('input[type="checkbox"]:checked');
+    const seatData = [];
+    let total = 0;
+
+    // Update visual states for all seats
+    formElement.querySelectorAll('.seat-checkbox').forEach(checkbox => {
+        const label = document.querySelector(`label[for="${checkbox.id}"]`);
+        if (checkbox.checked && !checkbox.disabled) {
+            label.classList.add('selected-by-user');
+            label.setAttribute('aria-pressed', 'true');
+        } else {
+            label.classList.remove('selected-by-user');
+            label.setAttribute('aria-pressed', 'false');
+        }
+    });
+
+    checkedSeats.forEach(seat => {
+        const label = document.querySelector(`label[for="${seat.id}"]`);
+        const category = getSeatCategory(label);
+        const multiplier = categoryMultipliers[category];
+        const price = basePrice * multiplier;
+        const seatNumber = label.textContent.trim();
+        
+        seatData.push({
+            id: seat.value,
+            number: seatNumber,
+            category: category,
+            price: price
+        });
+        
+        total += price;
+    });
+
+    // Update selected count in header
+    if (selectedCountElement) {
+        selectedCountElement.textContent = checkedSeats.length;
+    }
+
+    // Store seat data for form submission
+    if (seatsDataInput) {
+        seatsDataInput.value = JSON.stringify(seatData);
+    }
+
+    if (seatData.length === 0) {
+        selectedSeatsContainer.innerHTML = '<p class="text-muted small">No seats selected</p>';
+        proceedBtn.disabled = true;
+        if (totalSeatsElement) totalSeatsElement.textContent = '0';
+    } else {
+        let html = '<div class="seat-items">';
+        seatData.forEach(seat => {
+            html += `<div class="seat-item">
+                        <span class="seat-num">${seat.number}</span>
+                        <span class="seat-cat">${seat.category}</span>
+                        <span class="seat-price">Rs. ${seat.price.toFixed(0)}</span>
+                     </div>`;
+        });
+        html += '</div>';
+        selectedSeatsContainer.innerHTML = html;
+        proceedBtn.disabled = false;
+        if (totalSeatsElement) totalSeatsElement.textContent = seatData.length;
+    }
+
+    totalPriceElement.textContent = 'Rs. ' + total.toFixed(0);
+}
+
+function validateBooking() {
+    const checkedSeats = formElement.querySelectorAll('input[type="checkbox"]:checked');
+    if (checkedSeats.length === 0) {
+        alert('Please select at least one seat before booking');
+        return false;
+    }
+    return true;
+}
+
+proceedBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const checkedSeats = formElement.querySelectorAll('input[type="checkbox"]:checked');
+    if (checkedSeats.length > 0) {
+        formElement.submit();
+    } else {
+        alert('Please select at least one seat');
+    }
+});
+
+// Prevent interaction with booked seats
+formElement.querySelectorAll('.seat-checkbox[data-booked="true"]').forEach(checkbox => {
+    // Prevent change event on booked seats
+    checkbox.addEventListener('change', (e) => {
+        e.preventDefault();
+        checkbox.checked = false;
+        return false;
+    });
+    
+    // Prevent click from checking the checkbox
+    checkbox.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    });
+});
+
+// Prevent clicking on disabled seat labels
+document.querySelectorAll('.seat-label[data-disabled="true"]').forEach(label => {
+    label.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    });
+});
+
+// Add keyboard support to toggle seats with Enter/Space
+document.querySelectorAll('.seat-label').forEach(label => {
+    if (label.getAttribute('data-disabled') === 'true') return;
+    label.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const forId = label.getAttribute('for');
+            const cb = document.getElementById(forId);
+            if (cb && !cb.disabled) {
+                cb.checked = !cb.checked;
+                cb.dispatchEvent(new Event('change', { bubbles: true }));
+                label.setAttribute('aria-pressed', cb.checked ? 'true' : 'false');
+            }
+        }
+    });
+});
+
+formElement.querySelectorAll('input[type="checkbox"]').forEach(seat => {
+    // Only allow change events on non-booked seats
+    if (!seat.hasAttribute('data-booked')) {
+        seat.addEventListener('change', updateSummary);
+    }
+});
+
+updateSummary();
+</script>
+{% endblock %}

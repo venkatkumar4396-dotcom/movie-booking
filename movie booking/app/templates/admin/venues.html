@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Venues - MovieBook{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-4">Manage Venues</h1>
+            <a href="{{ url_for('admin.create_venue') }}" class="btn btn-primary mb-3">+ Create New Venue</a>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% for venue in venues %}
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ venue.name }}</h5>
+                        <p class="card-text">
+                            <strong>Location:</strong> {{ venue.city }}<br>
+                            <strong>Address:</strong> {{ venue.address }}<br>
+                            <strong>Capacity:</strong> {{ venue.capacity }} seats
+                        </p>
+                        {% if venue.amenities %}
+                            <p class="card-text">
+                                <strong>Amenities:</strong> {{ venue.amenities }}
+                            </p>
+                        {% endif %}
+                        <button class="btn btn-sm btn-warning">Edit</button>
+                        <button class="btn btn-sm btn-danger">Delete</button>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
